@@ -24,6 +24,7 @@ import java.util.Objects;
 public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDownloadedListener {
 
     private Bitmap mImageBitmap;
+    private Uri mBitmapUri;
 
     public static Fragment newInstance() {
         return new HomeFragment();
@@ -50,8 +51,8 @@ public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDow
 
     private void initializeViews(View view) {
         view.findViewById(R.id.share_btn).setOnClickListener(view1 -> {
-            if (mImageBitmap != null) {
-                shareTextAndImage(mImageBitmap);
+            if (null != mImageBitmap && null != mBitmapUri) {
+                shareTextAndImage(mBitmapUri);
             } else {
                 loadImageBitmap();
             }
@@ -71,7 +72,8 @@ public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDow
     public void OnImageBitmapDownloaded(Bitmap bitmap) {
         hideProgressBarLyt();
         mImageBitmap = bitmap;
-        shareTextAndImage(mImageBitmap);
+        getBitmapUri(bitmap);
+        shareTextAndImage(mBitmapUri);
     }
 
     @Override
@@ -80,11 +82,7 @@ public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDow
         Toast.makeText(getContext(), R.string.image_bitmap_not_available, Toast.LENGTH_LONG).show();
     }
 
-    private void shareTextAndImage(Bitmap bitmap) {
-        String path = MediaStore.Images.Media.insertImage(Objects.requireNonNull(getContext()).
-                getContentResolver(), bitmap, getString(R.string.share_image), null);
-        Uri bitmapUri = Uri.parse(path);
-
+    private void shareTextAndImage(Uri bitmapUri ) {
         Intent shareIntent = new Intent();
         shareIntent.setAction(Intent.ACTION_SEND);
         shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text_msg));
@@ -92,6 +90,12 @@ public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDow
         shareIntent.setType("image/*");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
+    }
+
+    private void getBitmapUri(Bitmap bitmap) {
+        String path = MediaStore.Images.Media.insertImage(Objects.requireNonNull(getContext()).
+                getContentResolver(), bitmap, getString(R.string.share_image), null);
+        mBitmapUri = Uri.parse(path);
     }
 
     private void hideProgressBarLyt() {
