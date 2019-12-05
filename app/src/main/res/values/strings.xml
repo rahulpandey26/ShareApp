@@ -6,4 +6,5 @@
     <string name="share_text_msg">Thanks for using our App, Enjoy the share feature</string>
     <string name="image_bitmap_not_available">Image bitmap not available</string>
     <string name="share_image">Share Image</string>
+    <string name="share_app">Share App</string>
 </resources>

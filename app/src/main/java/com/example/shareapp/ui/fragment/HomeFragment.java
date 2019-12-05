@@ -9,16 +9,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.example.shareapp.R;
 import com.example.shareapp.util.Constants;
 import com.example.shareapp.util.ImageLoader;
 import com.example.shareapp.util.NetworkUtil;
+
 import java.util.Objects;
 
-public class HomeFragment extends Fragment implements ImageLoader.OnImageDownloadedListener {
+public class HomeFragment extends BaseFragment implements ImageLoader.OnImageDownloadedListener {
 
     private Bitmap mImageBitmap;
 
@@ -29,7 +32,8 @@ public class HomeFragment extends Fragment implements ImageLoader.OnImageDownloa
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
+        setLayout(R.layout.fragment_home);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
@@ -41,11 +45,12 @@ public class HomeFragment extends Fragment implements ImageLoader.OnImageDownloa
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initializeViews(view);
+        showToolbar();
     }
 
     private void initializeViews(View view) {
         view.findViewById(R.id.share_btn).setOnClickListener(view1 -> {
-            if(mImageBitmap != null){
+            if (mImageBitmap != null) {
                 shareTextAndImage(mImageBitmap);
             } else {
                 loadImageBitmap();
@@ -58,17 +63,20 @@ public class HomeFragment extends Fragment implements ImageLoader.OnImageDownloa
             Toast.makeText(getContext(), R.string.no_internet_connection, Toast.LENGTH_LONG).show();
             return;
         }
+        setProgressBarVisible();
         new ImageLoader(this).getImageBitmap(getContext(), Constants.SHARE_IMAGE_URL);
     }
 
     @Override
     public void OnImageBitmapDownloaded(Bitmap bitmap) {
+        hideProgressBarLyt();
         mImageBitmap = bitmap;
         shareTextAndImage(mImageBitmap);
     }
 
     @Override
     public void OnImageBitmapDownloadingError() {
+        hideProgressBarLyt();
         Toast.makeText(getContext(), R.string.image_bitmap_not_available, Toast.LENGTH_LONG).show();
     }
 
@@ -84,5 +92,9 @@ public class HomeFragment extends Fragment implements ImageLoader.OnImageDownloa
         shareIntent.setType("image/*");
         shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(Intent.createChooser(shareIntent, getString(R.string.share)));
+    }
+
+    private void hideProgressBarLyt() {
+        Objects.requireNonNull(getActivity()).runOnUiThread(this::hideProgressBar);
     }
 }
